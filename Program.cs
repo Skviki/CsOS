@@ -1,4 +1,6 @@
-﻿Start();
+﻿using System.Diagnostics;
+
+Start();
 ComandRequied();
 void ComandRequied()
 {
@@ -26,7 +28,8 @@ void ComandRequied()
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("  say |text|             (Output text to the console)");
                 Console.WriteLine("  cd |path|              (Change director)");
-                Console.WriteLine("  system os/pc_name/info (Display information about the device.)");
+                Console.WriteLine("  run |path|             (Executes the file located at the specified path)");
+                Console.WriteLine("  system os/pc_name/info (Display information about the device)");
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.WriteLine("Normal");
                 Console.ForegroundColor = ConsoleColor.White;
@@ -149,12 +152,25 @@ void ComandRequied()
             case "bondarchuk":
                 Bondarchuk();
                 break;
+            case "run":
+                try
+                {
+                    Process.Start(tokens[1]);
+                }
+                catch (Exception e)
+                {
+                    Error("Unable to start this process");
+                    Warring(e.Message);
+                    throw;
+                }
+                
+                break;
             case "" :
                 break;
             case "shutdown" :
                 return;
         default:
-            Error("Invalid command");
+            Error("Invalid command : " + string.Join(" ", tokens));
             break;
     }
     }
@@ -162,63 +178,74 @@ void ComandRequied()
 void Start()
 {
     Console.ForegroundColor = ConsoleColor.Magenta;
-    Console.WriteLine("    #########           ###    ###       #########         ###########   ");
-    Console.WriteLine(" ######   #####         ##     ##      #####   ######    #####     ##### ");
-    Console.WriteLine("#####       ####   ################   ####       #####   ####            ");
-    Console.WriteLine("#####                 ###     ##     #####       #####    ##########     ");
-    Console.WriteLine("#####                 ##     ##      #####       #####         ######### ");
-    Console.WriteLine("#####       ####  #################   ####       #####              #####");
-    Console.WriteLine(" ######   ######     ##     ##         #####   ######   ######     ##### ");
-    Console.WriteLine("    #########       ###    ###           #########         ###########   ");
+    Console.WriteLine("   █████████    ███  ███      ███████     █████████ \n  ███▒▒▒▒▒███ ████████████  ███▒▒▒▒▒███  ███▒▒▒▒▒███\n ███     ▒▒▒ ▒▒▒███▒▒███▒  ███     ▒▒███▒███    ▒▒▒ \n▒███          ████████████▒███      ▒███▒▒█████████ \n▒███         ▒▒▒███▒▒███▒ ▒███      ▒███ ▒▒▒▒▒▒▒▒███\n▒▒███     ███  ▒▒▒  ▒▒▒   ▒▒███     ███  ███    ▒███\n ▒▒█████████               ▒▒▒███████▒  ▒▒█████████ \n  ▒▒▒▒▒▒▒▒▒                  ▒▒▒▒▒▒▒     ▒▒▒▒▒▒▒▒▒");
     Console.ForegroundColor = ConsoleColor.DarkMagenta;
-    Console.WriteLine("Version | 1.0 [Console]");
-    Console.WriteLine("Welcome!");
+    Console.WriteLine(" [-------------------------------------------------------]");
+    Console.ForegroundColor = ConsoleColor.White;
+    Console.WriteLine("   Version    | 1.0 [Console]");
+    Console.WriteLine($"   User Name  | {Environment.UserName}");
+    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+    Console.WriteLine(" [-------------------------------------------------------]");
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("                        ! Welcome !                       ");
+    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+    Console.WriteLine(" [-------------------------------------------------------]");
     Warring("If you have forgotten the commands or you are a beginner, then use the 'help' command.");
 }
 
 void Bondarchuk()
 {
     string[] ascii =
-    [
-        "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^```````^^^````````````````````````'``'``''''''''''",
-    "ppahbbkhoahhhhhkkkwdhkkkkkpppbpdqmJLmpdbdppdbbbqppddY?i>:''.^\"\"\",,,\"^^^````^\",,`'''''''''``?UOZZZZZZ",
-    "bqwdbkabqwwqdkhhhkkkqdkkkkkbbddpm0OwdpddpddddddddwX~^^'''''',::\"^''''''\",\"^'.'''''''.'.'''`^|COZZZZZ",
-    "dddbkkbpwmZOOmpkkkkhhkppbkkkbbbbbdmwpbbbpZZZwdbp(^````^\"^^,>](ttjjncvunxrxrrr/}+i;:\"'''...'``<UOZZOZ",
-    "bbbkkkbbdqZZwdpbhhkkkkkkpqkkbkbbbbbbbbbdZ0QQQQr\"```^\";>}/nLOmwpdkho**M#*ohkdpqqwZOLYu/]i\"'.''`+UOOOZ",
-    "kkkkkkbdOLUzvvzLwdbbbbbbbkbqbbbbbkbbbbbdpqm0O\\\"`^\"\",l]jJL0ZZwqpbha*###oahkdpqqpwwmZO0LCXf~\"'''\"(Q0CU",
-    "bkkkbbbpwUYUvJOqdbbdbbbbbbbbbwqbbbbbbbbpOCc)^```^^\"<)nYL00ZZmwqppbbkkkdpqwwwmmZZZOOQLCJXzx{;''`IzLJY",
-    "hppbbbkkkkbdbbqdpqmmmpbbbbbkkkbdqbbkkbbbmYn_'````^I[nCQ0OOOZZZwqqpbkbdpqmmOZOOO00QQLJUXcnr/)I'`;xO0Y",
-    "kkbbqbbkkbbbbbbdm0mppwwbbkhkkkkbkdqbbbbbbbq|`''`^\">jJQ0OOOOZZmwwwdbbbdpqwmZO0QQQQQLLCJXcnrjf)I``?ccf",
-    "bbbbkkppbbbbkdpbbdwwdbkkdwwmpbbbbbbdqpbbbbkw:`''`:}nYCQ0ZZOJcxft////jvJCO0O0QQQLLCJUzcccnxrjt?\"`[OZZ",
-    "bbbbbkkkdqbbbbbbbbbbbbbdwOQQQ0wdbkkkbbpdbbkd>'``^<tcUJLLvrttt\\)?~>!!>+{ruzJLLQLJYur(?<!II>]\\\\]'`jZmZ",
-    "mdbkkkkkkkkqpbbbbbkbkkbdqqZZmqppbbkbbbbbdqkk)'``^_uUJCYuxxxuxf/(}-~<<~_[1|rzXXvj(?+>i!ii~_--?!`1ZZmm",
-    "qpdpdbkbkbbbbwwbkbkkkkkbmQUvrjxYZpbbbbbbbbbpji``^}UCCJcf\\\\({?(J0Cv(!l!<+?{tuvx([_>i!l!i<+-]}}!\\mmZmZ",
-    "qmmwqpbddddbbbbdqdkkkkkbpQzcccOwdddddbbbbbdZ-]<:,xCQOOQLu/11[_<;``+-l;Ii_/CQCn[!:\"^``^;!--]}1xZwwmmO",
-    "mZqqwmwppdbbbbbbbbppkkbbbbbppbwppwCQmdbbdddZu/~:lvULOmppqmLut|)11}}11{)nOdh*hO1I,,,I!<~~<+[{(QwwwmmZ",
-    "ppOZpdpdpqqppdbbbbbbdqbkbbbkbddbq0OpdppdbbbpY)<i+uzC0wpddddbbOj1}}{Ybkbbka#MoqCt~!!>~+_-][1\\tQmmZZZm",
-    "pppppdddmZQLQQZpbbbbbbbppkbbbddbbbqpbbbbwZOZCqUc(xuXLZmpbha*#MM##**oohkkha*MokZUCQ0QJzvunxxxr0OZZmmm",
-    "qppdbbdpwZOLOwppkbbbbbbbbdqbbbbbbbbbkddpm0QQLuCu/jruXC0mqbkhhahkdq0cObhho*MM*kwQLQZwwqmZ0CXvuZmZQCJJ",
-    "pdbbbbbdpOUYnjrvUZbbbbbbbbkbqqdbbbbkkkkbddZCCQQQufxxxvXCL0OO0QQCXftjXJUXzcccnxrfuzcYCCCCYXunUwOQLCJQ",
-    "OqdbbddddmzvcrCZwdbddbkkbbbddpwdbbbkkkbw0zujtrzQqUxjrjjrjrrrrjft/tJLc+>i<<?[[-~<_|rrrrjf\\/\\jmwwZQYxj",
-    "pdwZddddbddpqpbmdpmQQwbdbdddbbbkqwbbbbkbkkbbppdpqOf/\\\\||)111{}}}1uQQ0t~~<<<~~++__(vx/|1)11)OwwmOXnrx",
-    "ddddpOqddbdbbbdddwQ0pppppddbbbbbkbbwpbbbbbpwOOZwOpn(())(1{}[]?+<{cC0LLX)-~<<<~~+_-?]][}}{{CmwwwwmZO0",
-    "qddddddqmpdbddppdbdwwpdppm000ZpbbbbbbqpbbbbbdppdwmOf1111111{}]_?fuuccXY|~!lll!iil!~__?[{1YqqmmmmmmmZ",
-    "qdddddddddZwdbbbdddddbdqqZLQQZmpbkbbbbbdmpbbbbbddpqJ}1{}}}}}})\\uXXvj|)1{}-+~+_-]]]_-?[{1QwwwwwZmZZZZ",
-    "uJwppdddddddpOqpddbkbbbbbpm0UzzXQpbbbbbbbbqqdpdppf''`[)1}}}}1)tjrxxrf(}]_____?]]][[][}/JOZmqwwwmZZZO",
-    "CmppqqpddddppppmwdbbbbbbqJcxf/nXOddpdbbbbbdddZdpc....~][}11}{)\\fxuzYXXzx1]???][[[[[[_i[fX0mmmmwmmZZO",
-    "wpZ0L0wpppqppdbbdpZdbbbbbbbkbbwdpwmmmwbbdppqpwOz;....;_]]]}1)11|/xuczXXurj\\}}}}}}]!'..!LZmmO0ZmZZOmm",
-    "qqOYOqmmwqppddddbdbdmwddbbbbdqwpZ00ZQYnj{~llll;\"^`'`^,+?]]]][[))))))11{{{{}{{{}]?\"    ...;l+xCQOZmmm",
-    "wppw0wqqqq0LLLQwdddddddZqdbpmQX\\+!!!!l!iii!I;:;,^\"\"^^^i_----????--][[[]]]--___-__,'...''.'''''^![uYL",
-    "qqwwwqpqmZQLCLQmqdddddddqz~i><>ii!II;;Il!iiilll;^^\"\"```I<-_-___+++~~~~~~+~~++_+i'.  ........''.'``^\"",
-    "wwqpppppdpmOLvnuvYwppdU)~<>>><<<<<>>iilI;:;!iiIuQ\"\"^```'^l<+__+++~~<<<<<~<<<I^. .. .......'''''```^^",
-    "QmqppppppZufft}nvQqpw1+<~~<<<>><<<>ii><\\Yqk*#&WMMki,^`''``\"!<~+~~~+~~<>!:'....... ..;1_'...'..'..''^",
-    "qqm0qppppppppppwZpwQ,>><_+<<~+~~~~?xmahkkka*MWWWWWWb-\"^`'''';!>~~~~<i;'..........~1(||()){_+_~:^^\":;",
-    "qqqqqOOqppppppqZqmm^`><<++~~+fQd*#*o*MWMMMMohoo#B%8@&o0)I`''`,!~~~<,.'.''.`;?|rr\\((((|(|(\\\\tfxvXLZz{",
-    "ZwqqqqqwOmqpppqwqw<`^l>>~nOa*##MMMMMhkoMWWW&W%@B8B@MoWMkZQLUXr^``\"rrxxxxxrrrrrrrrxx\\((((|\\fruXULmppp",
-    "0wqqqqqqqqw0wqppp|```lna*ooooo***#MWWMhaa#B@@@$$$@B$@MdwZQJUU\\:_`|nrrrjrrrrxrxnxuvuun/\\/tjrvzYUJC0mw",
-    "nrUmwwwqwqqqqZOwz`''`[kpoaaoaao*##*o##*8@@Moho#8B$$$@@@@&hmQL]l;)xrxxxnnunuuuuvvuvvczzXXYnxuvccXCZqk",
-    "^\"\"\"\"\"\"\"\",,,,,,,::::::::::::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IIIIIIIIIIIllIIIlllllllllllllllll"
-    ];
+[
+    "█████████████▓▓▓▓▓█▓▓▓█▓▓▓▓███████████████▓▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▓▓▓▓▓▓",
+    "████████████████████▓▓▓█████████████████▓▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▓▓▓▓▓",
+    "█████████████████████▓▓███████▓▓▓▓████▓▒░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░░▒▒▓▓▓",
+    "█████████████████████████████▓▓▓▓▓▓▓▓▒░░░░░░░░░░░░▒▒▓▓▓▓▓▓████████████████▓▓▓▓▓▓▓▒▒▒▒░░░░░░░░░░░▒▓▓▓",
+    "███████████████████████████▓▓▓▓▓▓▓▓▓▒░░░░░░░░░▒▒▓▓▓▓▓▓▓▓█████████████████████▓▓▓▓▓▓▓▓▓▒▒▒░░░░░░░░▒▓▓",
+    "███████████████████████████████▓▓▓▓▒░░░░░░░░░▒▒▓▓▓▓▓▓▓▓██████████████████████▓▓▓▓▓▓▓▓▓▓▓▓▒░░░░░░░░▓▓",
+    "█████████████████████████████▓▓▓▓▒░░░░░░░░░░▒▒▓▓▓▓▓▓▓▓▓▓▓███████████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒░░░░░░▒▓",
+    "████████████████████████████▓▓▓▓▒░░░░░░░░░░▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓██████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒░░░░░▒▓",
+    "█▓▓▓█████████████████████████▓▓▓▒░░░░░░░░░░▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓██████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒░░░░░▓",
+    "▓▓███▓██████████████████████████▓░░░░░░░░░▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒░░░░▒",
+    "█▓▓█████████████████████████████▓▒░░░░░░░░▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒░░░░▒",
+    "██████████▓▓▓▓▓██████████████████▓░░░░░░░▒▒▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒░░░▓",
+    "█████████▓▓▓▓▓▓▓▓████████████████▓░░░░░░░▒▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒░░░░░░▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒░░░░░░▒▒▒▒▒░░░▓",
+    "████████▓▓▓▓▓▓▓██████████████████▓░░░░░░▒▒▓▓▓▓▓▓▓▓▒▓▓▓▓▒▒▒▒▒▒░░░░░▒▒▒▒▒▒▓▓▓▓▓▓▓▒▒▒░░░░░░░░░░▒▒▒░░░▒▓",
+    "███████████▓▓▓▓▓▓▓▓███████████████▒░░░░░▒▒▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░▒▒▒▒▒▓▓▓▓▒▒▒▒▒░░░░░░░░▒▒▒▒▒▒░░▒▓▓",
+    "█████████▓▓▓▓▓▒▒▒▓▓▓█████████████▓▒░░░░░▒▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▓▒▒▒▒▒░░░░░░▒▒▒▒▓▓▓▒▒▒▒░░░░░░░░░░▒▒▒▒▒▒░▒▓▓▓",
+    "█████████▓▓▓▓▓▒▓▓▓▓██████████████▓░░░░░░▒▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒░░░░░░▒░░░░░░▒▒▓▓▓▓▒▒░░░░░░░░░░░░▒▒▒▒▒▒▒▓▓▓▓",
+    "████████████████▓████▓▓▓█████████▓▒▒▒░░▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒░░▒▓▓▓██▓▓▒░░░░░░░░░░░░░░▒▒▒▒▓▓▓▓▓",
+    "█████████████▓▓▓▓▓██▓▓▓▓█████████▓▒▒▒░░▒▓▓▓▓▓▓████▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓██████▓▓▒░░░░░░▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓",
+    "███████████████████▓▓▓▓██████████▓▓▒▒░░▒▓▓▓▓▓▓████████▓▓▓▒▒▒▒▒▒▓████████████▓▓▒░░░░░░▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓",
+    "█████████████████████▓▓███████▓▓▓▓▓▓▒▒▒▒▓▓▓▓▓▓▓█████████████████████████████▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓",
+    "█████████████████████████████▓▓▓▓▓▓▓▓▓▒▒▒▓▓▓▓▓▓▓█████████████████████████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
+    "████████████████████████████▓▓▓▓▓▓▓▓▓▓▒▒▒▒▓▓▓▓▓▓▓███████████▓▓▓▓█████████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
+    "▓█████████████████████████████▓▓▓▓▓▓▓▓▓▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
+    "▓███████████████████████████▓▓▓▓▓▒▒▒▓▓▒▓▓▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▓▓▒▒▒░░░▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▒▒▒▓▓▓▓▓▓▓",
+    "████████████████████████████▓▓▓▓▓▒▓▓▓▓██▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▒▒░░░░░░▒▒▒▒░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓",
+    "█▓▓▓▓▓██████████████▓█████████████▓████▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▒▒░░░░░░░░░░░▒▒▒▒▓▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓",
+    "▓▓▓██▓▓█████████████████████████▓▓▓▓▓█▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▒▒░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓",
+    "██▓▓▓█████████████████████████████████▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓",
+    "███▓██████▓▓▓▓▓▓▓██████████████████████▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▒▒▒░░░░░░░░░░░░░▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓",
+    "█████████▓▓▓▓▓▓▓▓▓██████████▓█████████████▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▒▒▒▒▒▒▒▒░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓",
+    "█████████▓▓▓▓▓▓▓▓▓██████████████████████▓▓░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓",
+    "██████████▓▓▓▓▓▓▓▓▓▓█████████████▓█████▓░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓",
+    "█████████▓▓▓▓▒▒▒▒▓▓▓███████████████▓███▒░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▒▒▓▓▓▓▓▓▓▓▓▓▓▓",
+    "▓▓████████▓▓▓▓▓▓▓▓█████▓████████████▓▓▓░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░▒▓▓▓▓▓▓▓▓▓▓▓▓▓",
+    "██▓███████████▓▓█▓██▓▓▓▓▓████▓▓▓▓▒▒▒▒▒░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░▒▓▓▓▓▓▓▓▓▓▓▓",
+    "████▓▓█████████▓▓█▓▓▓▓▓▓▓▓▒▒▒▒▒░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░▒▒▓▓▓▓▓",
+    "███████▓██████▓▓▓▓▓▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░▒▒▒▓",
+    "█████████▓▓▓▓▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░",
+    "████████▓▓▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
+    "▓▓████▓▓▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▓▒░░░░░░░░░░░░░▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
+    "▓▓██▓▓▒▒░░░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▓▓████▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
+    "▓▓█▓▒▒░░░▒░░░░░░░░░░░░░░░▒▒▓█████████████▓▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▒▒▒░░░░░░░░░░░░",
+    "█▓▓▒░░░░░▒░░░░░░░░░▒▒▒▒▓███████████████████▓▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░",
+    "▓▓▓░░░░░░░░░░░▒▒▒▓▓▓█████████████████████████▓▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▒",
+    "█▓░░░░░░░░░▒▒▓▓█████████████████████████████████▓▓▓▒▒▒▒░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓",
+    "▓▒░░░░░░▒▓▓▓█████████████████████████████████████▓▓▓▓▓▓▒░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓",
+    "▒░░░░░▒▓████████████████████████████████████████▓▓▓▓▓▓▓▒░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓"
+];
 
     foreach (string line in ascii) Console.WriteLine(line);
 }
