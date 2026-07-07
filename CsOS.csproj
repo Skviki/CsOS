@@ -6,7 +6,14 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PublishAot>true</PublishAot>
+        <PublishTrimmed>true</PublishTrimmed>
         <InvariantGlobalization>true</InvariantGlobalization>
     </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="SystemUpdate\**" />
+        <EmbeddedResource Remove="SystemUpdate\**" />
+        <None Remove="SystemUpdate\**" />
+    </ItemGroup>
 
 </Project>

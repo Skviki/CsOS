@@ -9,38 +9,38 @@ void ComandRequied()
          Console.ForegroundColor = ConsoleColor.DarkBlue;
         Console.Write("> ");
         Console.ForegroundColor = ConsoleColor.White;
-        string? text = Console.ReadLine();
+        string? text = Console.ReadLine() + " ";
         string[] tokens = text!.Split();
         switch (tokens[0])
         {
             case "help":
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("Super easy");
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("  dir        (Your current directory where you are located)");
-                Console.WriteLine("  date        (Your date now)");
-                Console.WriteLine("  clear      (Clear the console)");
-                Console.WriteLine("  optimize   (Free up RAM. Not recommended for frequent use)");
-                Console.WriteLine("  bondarchuk (Shows you a cute little boy Bondarchuk)");
-                Console.WriteLine("  shutdown   (Shut down the OS)");
+                Help("dir        (Your current directory where you are located)");
+                Help("date        (Your date now)");
+                Help("clear      (Clear the console)");
+                Help("optimize   (Free up RAM. Not recommended for frequent use)");
+                Help("bondarchuk (Shows you a cute little boy Bondarchuk)");
+                Help("shutdown   (Shut down the OS)");
                 Console.ForegroundColor = ConsoleColor.DarkCyan;
                 Console.WriteLine("Easy");
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("  say |text|             (Output text to the console)");
-                Console.WriteLine("  cd |path|              (Change director)");
-                Console.WriteLine("  run |path|             (Executes the file located at the specified path)");
-                Console.WriteLine("  system os/pc_name/info (Display information about the device)");
+                Help("say |text|             (Output text to the console)");
+                Help("cd |path|              (Change director)");
+                Help("run |path|             (Executes the file located at the specified path)");
+                Help("system os/pc_name/info (Display information about the device)");
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.WriteLine("Normal");
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("  file write/read (Write or read a file)");
+                Help("file write/read (Write or read a file)");
+                if (tokens[1] != "")
+                    Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
                 break;
             case "say":
-                string textsay = string.Join(" ", tokens.Skip(1));
-                Console.WriteLine(textsay);
+                Console.WriteLine(string.Join(" ", tokens.Skip(1)));
                 break;
             case "dir":
                 Console.WriteLine(Directory.GetCurrentDirectory());
+                if (tokens[1] != "")
+                    Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
                 break;
             case "cd":
                 try
@@ -56,6 +56,8 @@ void ComandRequied()
                 break;
             case "date":
                 Console.WriteLine(DateTime.Now);
+                if (tokens[1] != "")
+                    Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
                 break;
             case "file":
                 switch (tokens[1])
@@ -88,14 +90,18 @@ void ComandRequied()
                         }
                         break;
                     case "help":
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        Console.WriteLine("  > write |path to file| / this |content_text|");
-                        Console.WriteLine("  > read |path to file|");
+                        Help("write |path to file| or this |content_text|");
+                        Help("read |path to file|");
+                        break;
+                    default:
+                        Tip("file help");
                         break;
                 }
                 break;
             case "clear":
                 Console.Clear();
+                if (tokens[1] != "")
+                    Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
                 break;
             case "test_tokens":
                 for (int i = 0; i < tokens.Length; i++)
@@ -116,6 +122,8 @@ void ComandRequied()
                 GC.Collect();
                 long afterRam = GC.GetTotalMemory(false) / 1024;
                 Console.WriteLine($"Optimized RAM : -{beforeRam - afterRam} KB");
+                if (tokens[1] != "")
+                    Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
                 break;
             case "system":
                 switch (tokens[1])
@@ -135,22 +143,19 @@ void ComandRequied()
                         break;
                     case "help":
                         Console.ForegroundColor = ConsoleColor.Gray;
-                        Console.WriteLine("  > os");
-                        Console.WriteLine("  > pc_name");
-                        Console.WriteLine("  > info");
+                        Help("os");
+                        Help("pc_name");
+                        Help("info");
                         break;
                     default:
-                        Console.Write("Please specify what exactly you would like to know? (You can use ");
-                        Console.ForegroundColor = ConsoleColor.Cyan; 
-                        Console.Write("system help");
-                        Console.ForegroundColor = ConsoleColor.White; 
-                        Console.Write(")"); 
-                        Console.WriteLine();
+                        Tip("system help");
                         break;
                 }
                 break;
             case "bondarchuk":
                 Bondarchuk();
+                if (tokens[1] != "")
+                    Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
                 break;
             case "run":
                 try
@@ -161,9 +166,7 @@ void ComandRequied()
                 {
                     Error("Unable to start this process");
                     Warring(e.Message);
-                    throw;
                 }
-                
                 break;
             case "" :
                 break;
@@ -182,7 +185,7 @@ void Start()
     Console.ForegroundColor = ConsoleColor.DarkMagenta;
     Console.WriteLine(" [-------------------------------------------------------]");
     Console.ForegroundColor = ConsoleColor.White;
-    Console.WriteLine("   Version    | 1.0 [Console]");
+    Console.WriteLine("   Version    | 1.1 [Console]");
     Console.WriteLine($"   User Name  | {Environment.UserName}");
     Console.ForegroundColor = ConsoleColor.DarkMagenta;
     Console.WriteLine(" [-------------------------------------------------------]");
@@ -259,4 +262,18 @@ void Warring(string textWarring)
 {
     Console.ForegroundColor = ConsoleColor.Yellow;
     Console.WriteLine(" ! " + textWarring);
+}
+void Help(string textHelp)
+{
+    Console.ForegroundColor = ConsoleColor.Gray;
+    Console.WriteLine("  > " + textHelp);
+}void Tip(string textTip)
+{
+    Console.ForegroundColor = ConsoleColor.Gray;
+    Console.Write("  ? Something went wrong. Try using ");
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.Write(textTip);
+    Console.ForegroundColor = ConsoleColor.Gray;
+    Console.Write(" - it will show you which arguments are supported.");
+    Console.WriteLine();
 }
