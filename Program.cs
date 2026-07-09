@@ -2,18 +2,20 @@
 
 Start();
 ComandRequied();
+
 void ComandRequied()
 {
     while (true)
     {
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write(Directory.GetCurrentDirectory());
         Console.ForegroundColor = ConsoleColor.DarkBlue;
-        Console.Write("> ");
+        Console.Write(" > ");
         Console.ForegroundColor = ConsoleColor.White;
         string? text = Console.ReadLine() + " ";
         string[] tokens = text!.Split();
         TokenAnalize(tokens);
 }
-
 void TokenAnalize(string[] tokens)
 {
     switch (tokens[0])
@@ -21,25 +23,24 @@ void TokenAnalize(string[] tokens)
         case "help":
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("Super easy");
-            Help("dir                       (Your current directory where you are located)");
-            Help("make_dir |folder name|    (Your current directory where you are located)");
-            Help("date                      (Your date now)");
-            Help("clear                     (Clear the console)");
-            Help("optimize                  (Free up RAM. Not recommended for frequent use)");
-            Help("bondarchuk                (Shows you a cute little boy Bondarchuk)");
-            Help("shutdown                  (Shut down the OS)");
-            Help("go_to_arch                (The command you can use to exit our C#OS shell.)");
+            Help("dir create/delet |folder name|        (Your current directory where you are located)");
+            Help("date                                  (Your date now)");
+            Help("clear                                 (Clear the console)");
+            Help("optimize                              (Free up RAM. Not recommended for frequent use)");
+            Help("bondarchuk                            (Shows you a cute little boy Bondarchuk)");
+            Help("shutdown                              (Shut down the OS)");
+            Help("exit                                  (The command you can use to exit our C#OS shell.)");
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine("Easy");
-            Help("say none/good/bad/warring |text|  (Output text to the console)");
-            Help("cd |path|                         (Change director)");
-            Help("ls none/|path|                    (Shows what is inside the current folder or the folder chosen by you)");
-            Help("run_csfile |path|                 (Reads a text file and executes each line as a system command. Empty lines and comments (with #) are ignored.)");
-            Help("run |path| or |ArchLinux command| (Executes the file located at the specified path)");
-            Help("system os/pc_name/info            (Display information about the device)");
+            Help("say none/good/bad/warring |text|      (Output text to the console)");
+            Help("cd |path|                             (Change director)");
+            Help("ls none/|path|                        (Shows what is inside the current folder or the folder chosen by you)");
+            Help("run_csfile |path|                     (Reads a text file and executes each line as a system command. Empty lines and comments (with #) are ignored.)");
+            Help("run |path| or |ArchLinux command|     (Executes the file located at the specified path)");
+            Help("system os/pc_name/info/disk_space     (Display information about the device)");
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("Normal");
-            Help("file write/read (Write or read a file)");
+            Help("file write/read |path to file|        (Write or read a file)");
             if (tokens[1] != "")
                 Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
             break;
@@ -55,19 +56,42 @@ void TokenAnalize(string[] tokens)
                 case "warring":
                     Warring(string.Join(" ", tokens.Skip(2)));
                     break;
+                case "help":
+                    Help("|text|         (Simply outputs your text to the console)");
+                    Help("good |text|    (Success message)");
+                    Help("bad |text|     (Error message)");
+                    Help("warring |text| (Warning)");
+                    break;
                 default:
                     Console.WriteLine(string.Join(" ", tokens.Skip(1)));
                     break;
             }
             break;
         case "dir":
-            Console.WriteLine(Directory.GetCurrentDirectory());
-            if (tokens[1] != "")
-                Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
-            break;
-        case "make_dir":
-            Directory.CreateDirectory(tokens[1]);
-            Console.WriteLine(Path.Combine(Directory.GetCurrentDirectory(), tokens[1]));
+            switch (tokens[1])
+            {
+                case "create":
+                    Directory.CreateDirectory(tokens[2]);
+                    Console.WriteLine(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
+                    break;
+                case "delete":
+                    try
+                    {
+                        Directory.Delete(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
+                    }
+                    catch (Exception e)
+                    {
+                        Error(e.Message);
+                    }
+                    break;
+                case "help":
+                    Help("create |folder name| (Create a folder in the current directory)");
+                    Help("delete |folder name| (Delete a folder in the current directory.)");
+                    break;
+                default:
+                    Tip("dir help");
+                    break;
+            }
             break;
         case "ls":
             switch (tokens[1])
@@ -117,14 +141,14 @@ void TokenAnalize(string[] tokens)
                 Directory.SetCurrentDirectory(tokens[1]);
                 Console.WriteLine("Current directory : " + Directory.GetCurrentDirectory());
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Directory not found!");
+                Error(e.Message);
             }
             break;
         case "date":
             Console.WriteLine(DateTime.Now);
+            Warring($"Currently, the OS version shows incorrect time because the default time zone is set to: {TimeZoneInfo.Local.Id} . This will be fixed in future updates.");
             if (tokens[1] != "")
                 Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
             break;
@@ -154,13 +178,13 @@ void TokenAnalize(string[] tokens)
                     {
                         Console.WriteLine(File.ReadAllText(tokens[2]));
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        Error("Not found file");
+                        Error(e.Message);
                     }
                     break;
                 case "help":
-                    Help("write |path to file| or this |content_text|");
+                    Help("write |path to file| or 'this' |content_text|");
                     Help("read |path to file|");
                     break;
                 default:
@@ -223,6 +247,7 @@ void TokenAnalize(string[] tokens)
                     Console.ForegroundColor = ConsoleColor.Gray;
                     Help("os");
                     Help("pc_name");
+                    Help("disk_space");
                     Help("info");
                     break;
                 default:
@@ -238,12 +263,12 @@ void TokenAnalize(string[] tokens)
         case "run":
             try
             {
-                Process.Start(tokens[1]);
+                Process process = Process.Start(string.Join(" ",tokens.Skip(1)));
+                process.WaitForExit();
             }
             catch (Exception e)
             {
-                Error("Unable to start this process");
-                Warring(e.Message);
+                Error(e.Message);
             }
             break;
         case "run_csfile":
@@ -258,17 +283,16 @@ void TokenAnalize(string[] tokens)
             }
             catch (Exception e)
             {
-                Error("Failed to start this process");
-                Warring(e.Message);
+                Error(e.Message);
             }
             break;
-        case "go_to_arch":
+        case "exit":
             return;
-        case "#" :
+        case "#":
             break;
-        case "" :
+        case "":
             break;
-        case "shutdown" :
+        case "shutdown":
             Process.Start("poweroff -f");
             break;
     default:
