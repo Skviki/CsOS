@@ -37,7 +37,7 @@ void TokenAnalize(string[] tokens)
             Help("ls none/|path|                        (Shows what is inside the current folder or the folder chosen by you)");
             Help("run_cfile |path|                      (Reads a text file and executes each line as a system command. Empty lines and comments (with #) are ignored.)");
             Help("run |path| or |ArchLinux command|     (Executes the file located at the specified path)");
-            Help("system os/pc_name/info/disk_space     (Display information about the device)");
+            Help("system os/pc_name/info    (Display information about the device)");
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("Normal");
             Help("file write/read |path to file|        (Write or read a file)");
@@ -72,12 +72,13 @@ void TokenAnalize(string[] tokens)
             {
                 case "create":
                     Directory.CreateDirectory(tokens[2]);
-                    Console.WriteLine(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
+                    Good(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
                     break;
                 case "delete":
                     try
                     {
                         Directory.Delete(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
+                        Good("Complete!");
                     }
                     catch (Exception e)
                     {
@@ -215,24 +216,18 @@ void TokenAnalize(string[] tokens)
             long beforeRam = GC.GetTotalMemory(false) / 1024;
             GC.Collect();
             long afterRam = GC.GetTotalMemory(false) / 1024;
-            Console.WriteLine($"Optimized RAM : -{beforeRam - afterRam} KB");
+            Good($"Optimized RAM : -{beforeRam - afterRam} KB");
             if (tokens[1] != "")
                 Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
             break;
         case "system":
             switch (tokens[1])
             { 
-                    
                 case "os":
                     Console.WriteLine($"Os : {Environment.OSVersion}");
                     break;
                 case "pc_name":
                     Console.WriteLine($"Pc name : {Environment.MachineName}");
-                    break;
-                case "disk_space":
-                    DriveInfo diskSpace = new DriveInfo(Environment.CurrentDirectory);
-                    Console.WriteLine($"Disk Space | {(diskSpace.TotalSize - diskSpace.TotalFreeSpace) / 1024 / 1024 / 1024}GB / {diskSpace.TotalSize / 1024 / 1024 / 1024}GB");
-                    Good($"{diskSpace.TotalFreeSpace / 1024 / 1024 / 1024}GB Free Space");
                     break;
                 case "info":
                     DriveInfo driveInfo = new DriveInfo(Environment.CurrentDirectory);
@@ -241,7 +236,8 @@ void TokenAnalize(string[] tokens)
                     Console.WriteLine($"USER       | {Environment.UserName}");
                     Console.WriteLine($"CPU_COUNT  | {Environment.ProcessorCount}");
                     Console.WriteLine($"BIT        | {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
-                    Console.WriteLine($"Disk Space | {(driveInfo.TotalSize - driveInfo.TotalFreeSpace) / 1024 / 1024 / 1024}GB / {driveInfo.TotalSize / 1024 / 1024 / 1024}GB , Free Space {driveInfo.TotalFreeSpace / 1024 / 1024 / 1024}GB");
+                    double gb = 1024.0 * 1024 * 1024;
+                    Console.WriteLine($"Disk Space | {(driveInfo.TotalSize - driveInfo.TotalFreeSpace) / gb:F2}GB / {driveInfo.TotalSize / gb:F2}GB , Free Space {driveInfo.TotalFreeSpace / gb:F2}GB");
                     break;
                 case "help":
                     Console.ForegroundColor = ConsoleColor.Gray;
@@ -290,7 +286,11 @@ void TokenAnalize(string[] tokens)
             }
             break;
         case "exit":
-            return;
+            Process.GetCurrentProcess().Kill();
+            break;
+        case "check_update":
+            CheckVersion("1.4.2");
+            break;
         case "#":
             break;
         case "":
@@ -300,19 +300,26 @@ void TokenAnalize(string[] tokens)
             break;
     default:
         Error("The system does not recognize this command : " + string.Join(" ", tokens));
-        Warring("Check for possible errors in your command");
         break;
         }
     }
 }
 void Start()
 {
+    string version = "1.4.2 [Beta]";
+    
     Console.ForegroundColor = ConsoleColor.Magenta;
     Console.WriteLine("  ██████╗ ██╗ ██╗  ██████╗ ███████╗\n ██╔════╝████████╗██╔═══██╗██╔════╝\n ██║     ╚██╔═██╔╝██║   ██║███████╗\n ██║     ████████╗██║   ██║╚════██║\n ╚██████╗╚██╔═██╔╝╚██████╔╝███████║\n  ╚═════╝ ╚═╝ ╚═╝  ╚═════╝ ╚══════╝");
     Console.ForegroundColor = ConsoleColor.DarkMagenta;
     Console.WriteLine(" ┌─────────────┬─────────────────────────────────────────┐");
     Console.ForegroundColor = ConsoleColor.White;
-    Console.WriteLine(" │  Version    │ 1.4.1                                   │");
+    Console.Write($" │  Version    │ {version}");
+    for (int i = 0; i < 40 - version.Length; i++)
+    {
+        Console.Write(" ");
+    }
+    Console.Write("│");
+    Console.WriteLine();
     Console.Write($" │  User Name  │ {Environment.UserName}");
     for (int i = 0; i < 40 - Environment.UserName.Length; i++)
     {
@@ -415,4 +422,15 @@ void Tip(string textTip)
     Console.ForegroundColor = ConsoleColor.Gray;
     Console.Write(" - it will show you which arguments are supported.");
     Console.WriteLine();
+}
+
+async void CheckVersion(string version)
+{
+    using HttpClient client = new();
+    string versionGet = await client.GetStringAsync("https://github.com/Skviki/CsOS/blob/master/v.txt");
+    if (versionGet != version)
+    {
+        Good($"A new version {versionGet} is available! Current version {version}.");
+        Warring("The update feature has not been implemented yet!");
+    }
 }
