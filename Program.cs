@@ -35,7 +35,7 @@ void TokenAnalize(string[] tokens)
             Help("say none/good/bad/warring |text|      (Output text to the console)");
             Help("cd |path|                             (Change director)");
             Help("ls none/|path|                        (Shows what is inside the current folder or the folder chosen by you)");
-            Help("run_csfile |path|                     (Reads a text file and executes each line as a system command. Empty lines and comments (with #) are ignored.)");
+            Help("run_cfile |path|                      (Reads a text file and executes each line as a system command. Empty lines and comments (with #) are ignored.)");
             Help("run |path| or |ArchLinux command|     (Executes the file located at the specified path)");
             Help("system os/pc_name/info/disk_space     (Display information about the device)");
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -139,7 +139,7 @@ void TokenAnalize(string[] tokens)
             try
             {
                 Directory.SetCurrentDirectory(tokens[1]);
-                Console.WriteLine("Current directory : " + Directory.GetCurrentDirectory());
+                Good("Current directory : " + Directory.GetCurrentDirectory());
             }
             catch (Exception e)
             {
@@ -263,7 +263,10 @@ void TokenAnalize(string[] tokens)
         case "run":
             try
             {
-                Process process = Process.Start(string.Join(" ",tokens.Skip(1)));
+                Process process = new Process();
+                process.StartInfo.FileName = tokens[1];
+                process.StartInfo.Arguments = tokens[2];
+                process.Start();
                 process.WaitForExit();
             }
             catch (Exception e)
@@ -271,7 +274,7 @@ void TokenAnalize(string[] tokens)
                 Error(e.Message);
             }
             break;
-        case "run_csfile":
+        case "run_cfile":
             try
             {
                 string[] tokenAnalize = File.ReadAllLines(tokens[1]);
@@ -293,10 +296,11 @@ void TokenAnalize(string[] tokens)
         case "":
             break;
         case "shutdown":
-            Process.Start("poweroff -f");
+            Process.Start("poweroff");
             break;
     default:
-        Error("Invalid command : " + string.Join(" ", tokens));
+        Error("The system does not recognize this command : " + string.Join(" ", tokens));
+        Warring("Check for possible errors in your command");
         break;
         }
     }
@@ -308,7 +312,7 @@ void Start()
     Console.ForegroundColor = ConsoleColor.DarkMagenta;
     Console.WriteLine(" ┌─────────────┬─────────────────────────────────────────┐");
     Console.ForegroundColor = ConsoleColor.White;
-    Console.WriteLine(" │  Version    │ 1.4                                     │");
+    Console.WriteLine(" │  Version    │ 1.4.1                                   │");
     Console.Write($" │  User Name  │ {Environment.UserName}");
     for (int i = 0; i < 40 - Environment.UserName.Length; i++)
     {
