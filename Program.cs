@@ -5,7 +5,8 @@ namespace CsOS;
 internal abstract class Program
 {
     private static readonly HttpClient Client = new();
-    const string Version = "1.4.3";
+    const string Version = "1.4.4";
+    private static string[]? _commandOld = ["say","hello!"];
 
     public static void Main()
     {
@@ -156,53 +157,55 @@ internal abstract class Program
                     case "date":
                         Console.WriteLine(DateTime.Now);
                         Warring($"Currently, the OS version shows incorrect time because the default time zone is set to: {TimeZoneInfo.Local.Id} . This will be fixed in future updates.");
-                        if (tokens[1] != "")
-                            Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
                         break;
                     case "file":
-                        switch (tokens[1])
+                        if (tokens.Length >= 3)
                         {
-                            case "write":
-                                if (tokens[2] == "this")
-                                {
-                                    File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "file.txt"), string.Join(" ", tokens.Skip(3)));
-                                    Good("file written" +  Path.Combine(Directory.GetCurrentDirectory(), "file.txt"));
-                                }
-                                else
-                                {
+                            switch (tokens[1])
+                            {
+                                case "write":
+                                    if (tokens[2] == "this")
+                                    {
+                                        File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "file.txt"),
+                                            string.Join(" ", tokens.Skip(3)));
+                                        Good("file written" +
+                                             Path.Combine(Directory.GetCurrentDirectory(), "file.txt"));
+                                    }
+                                    else
+                                    {
+                                        try
+                                        {
+                                            File.WriteAllText(tokens[2], tokens[3]);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Error("Fail to write : " + e.Message);
+                                        }
+                                    }
+                                    break;
+                                case "read":
                                     try
                                     {
-                                        File.WriteAllText(tokens[2],tokens[3]);
+                                        Console.WriteLine(File.ReadAllText(tokens[2]));
                                     }
                                     catch (Exception e)
                                     {
-                                        Error("Fail to write : " + e.Message);
+                                        Error(e.Message);
                                     }
-                                }
-                                break;
-                            case "read":
-                                try
-                                {
-                                    Console.WriteLine(File.ReadAllText(tokens[2]));
-                                }
-                                catch (Exception e)
-                                {
-                                    Error(e.Message);
-                                }
-                                break;
-                            case "help":
-                                Help("write |path to file| or 'this' |content_text|");
-                                Help("read |path to file|");
-                                break;
-                            default:
-                                Tip("file help");
-                                break;
+
+                                    break;
+                                case "help":
+                                    Help("write |path to file| or 'this' |content_text|");
+                                    Help("read |path to file|");
+                                    break;
+                                default:
+                                    Tip("file help");
+                                    break;
+                            }
                         }
                         break;
                     case "clear":
                         Console.Clear();
-                        if (tokens[1] != "")
-                            Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
                         break;
                     case "test_tokens":
                         for (int i = 0; i < tokens.Length; i++)
@@ -219,70 +222,108 @@ internal abstract class Program
                         }
                         break;
                     case "system":
-                        switch (tokens[1])
-                        { 
-                            case "os":
-                                Console.WriteLine($"Os : {Environment.OSVersion}");
-                                break;
-                            case "pc_name":
-                                Console.WriteLine($"Pc name : {Environment.MachineName}");
-                                break;
-                            case "info":
-                                DriveInfo driveInfo = new DriveInfo(Environment.CurrentDirectory);
-                                Console.WriteLine($"OS         | {Environment.OSVersion}");
-                                Console.WriteLine($"PC         | {Environment.MachineName}");
-                                Console.WriteLine($"USER       | {Environment.UserName}");
-                                Console.WriteLine($"CPU_COUNT  | {Environment.ProcessorCount}");
-                                Console.WriteLine($"BIT        | {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
-                                double gb = 1024.0 * 1024 * 1024;
-                                Console.WriteLine($"Disk Space | {(driveInfo.TotalSize - driveInfo.TotalFreeSpace) / gb:F2}GB / {driveInfo.TotalSize / gb:F2}GB , Free Space {driveInfo.TotalFreeSpace / gb:F2}GB");
-                                string kernelVersion = Environment.OSVersion.Version.ToString();
-                                Console.WriteLine($"Kernel     | {kernelVersion}");
-                                break;
-                            case "help":
-                                Console.ForegroundColor = ConsoleColor.Gray;
-                                Help("os");
-                                Help("pc_name");
-                                Help("disk_space");
-                                Help("info");
-                                break;
-                            default:
-                                Tip("system help");
-                                break;
+                        if (tokens.Length >= 2)
+                        {
+                            switch (tokens[1])
+                            {
+                                case "os":
+                                    Console.WriteLine($"Os : {Environment.OSVersion}");
+                                    break;
+                                case "pc_name":
+                                    Console.WriteLine($"Pc name : {Environment.MachineName}");
+                                    break;
+                                case "info":
+                                    DriveInfo driveInfo = new DriveInfo(Environment.CurrentDirectory);
+                                    Console.WriteLine($"OS         | {Environment.OSVersion}");
+                                    Console.WriteLine($"PC         | {Environment.MachineName}");
+                                    Console.WriteLine($"USER       | {Environment.UserName}");
+                                    Console.WriteLine($"CPU_COUNT  | {Environment.ProcessorCount}");
+                                    Console.WriteLine($"BIT        | {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
+                                    
+                                    double gb = 1024.0 * 1024 * 1024;
+                                    Console.WriteLine($"Disk Space | {(driveInfo.TotalSize - driveInfo.TotalFreeSpace) / gb:F2}GB / {driveInfo.TotalSize / gb:F2}GB , Free Space {driveInfo.TotalFreeSpace / gb:F2}GB");
+                                    
+                                    string kernelVersion = Environment.OSVersion.Version.ToString();
+                                    Console.WriteLine($"Kernel     | {kernelVersion}");
+                                    break;
+                                case "help":
+                                    Console.ForegroundColor = ConsoleColor.Gray;
+                                    Help("os");
+                                    Help("pc_name");
+                                    Help("disk_space");
+                                    Help("info");
+                                    break;
+                                default:
+                                    Tip("system help");
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Tip("system help");
+                        }
+                        break;
+                    case "wifi":
+                        if (tokens.Length >= 2)
+                        {
+                            switch (tokens[1])
+                            {
+                                case "list":
+                                    Process.Start("nmcli device wifi list");
+                                    break;
+                                case "connect":
+                                    Process.Start($"nmcli device wifi connect '{tokens[1]}' password '{tokens[2]}'");
+                                    break;
+                            }
+                            try
+                            {
+                                Process.Start($"nmcli device wifi list nmcli device wifi connect '{tokens[1]}' password '{tokens[2]}'");
+                            }
+                            catch (Exception e)
+                            {
+                                Error(e.Message);
+                            }
+                        }
+                        else
+                        {
+                            Help("wifi help");
                         }
                         break;
                     case "bondarchuk":
                         Bondarchuk();
-                        if (tokens[1] != "")
-                            Warring("The remaining commands have been ignored because this command does not require any arguments. We recommend not wasting your energy on typing extra words ;)");
                         break;
                     case "run":
-                        try
+                        if (tokens.Length >= 2)
                         {
-                            Process process = new Process();
-                            process.StartInfo.FileName = tokens[1];
-                            process.StartInfo.Arguments = tokens[2];
-                            process.Start();
-                            process.WaitForExit();
-                        }
-                        catch (Exception e)
-                        {
-                            Error(e.Message);
+                            try
+                            {
+                                Process process = new Process();
+                                process.StartInfo.FileName = tokens[1];
+                                process.Start();
+                                process.WaitForExit();
+                            }
+                            catch (Exception e)
+                            {
+                                Error(e.Message);
+                            }
                         }
                         break;
                     case "run_cfile":
-                        try
+                        if (tokens.Length >= 2)
                         {
-                            string[] tokenAnalize = File.ReadAllLines(tokens[1]);
-                            for (int i = 0; i < tokenAnalize.Length; i++)
+                            try
                             {
-                                string[] tokenToAnalize = tokenAnalize[i].Split(' ');
-                                TokenAnalize(tokenToAnalize);
+                                string[] tokenAnalize = File.ReadAllLines(tokens[1]);
+                                for (int i = 0; i < tokenAnalize.Length; i++)
+                                {
+                                    string[] tokenToAnalize = tokenAnalize[i].Split(' ');
+                                    TokenAnalize(tokenToAnalize);
+                                }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Error(e.Message);
+                            catch (Exception e)
+                            {
+                                Error(e.Message);
+                            }
                         }
                         break;
                     case "exit":
@@ -291,6 +332,13 @@ internal abstract class Program
                     case "check_update":
                        CheckVersion(Version);
                        break;
+                    case "^":
+                        if (_commandOld![0] != "^")
+                        {
+                            if (_commandOld != null) 
+                                TokenAnalize(_commandOld);
+                        }
+                        break;
                     case "#":
                         break;
                     case "":
@@ -301,6 +349,10 @@ internal abstract class Program
                     default:
                         Error("The system does not recognize this command : " + string.Join(" ", tokens));
                         break;
+                }
+                if (tokens[0] != "^")
+                {
+                    _commandOld = tokens;
                 }
             }
             // ReSharper disable once FunctionNeverReturns
@@ -332,7 +384,8 @@ internal abstract class Program
             Console.WriteLine(" │                       ! Welcome !                     │");
             Console.ForegroundColor = ConsoleColor.DarkMagenta;
             Console.WriteLine(" └───────────────────────────────────────────────────────┘");
-            Warring("If you have forgotten the commands or you are a beginner, then use the 'help' command.");
+            Good("Remember, the 'help' command is always there to help!");
+            Good("Just a reminder that we're on GitHub: https://github.com/Skviki/CsOS");
         }
 
         void Bondarchuk()
