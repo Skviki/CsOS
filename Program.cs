@@ -4,15 +4,16 @@ namespace CsOS;
 
 internal abstract class Program
 {
+    public static int consoleWidth = Console.BufferWidth;
+    public static int consoleHeight = Console.BufferHeight;
     private static readonly HttpClient Client = new();
-    const string Version = "1.4.4";
+    const string Version = "1.4.5";
     private static string[]? _commandOld = ["say","hello!"];
 
-    public static void Main()
+    public static async Task Main()
     {
-        Start();
+        await Start();
         ComandRequied();
-
         void ComandRequied()
         {
             while (true)
@@ -33,7 +34,6 @@ internal abstract class Program
                     case "help":
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine("Super easy");
-                        Help("dir create/delet |folder name|        (Your current directory where you are located)");
                         Help("date                                  (Your date now)");
                         Help("clear                                 (Clear the console)");
                         Help("bondarchuk                            (Shows you a cute little boy Bondarchuk)");
@@ -50,108 +50,132 @@ internal abstract class Program
                         Console.ForegroundColor = ConsoleColor.Blue;
                         Console.WriteLine("Normal");
                         Help("file write/read |path to file|        (Write or read a file)");
+                        Help("dir create/delet |folder name|        (Create or delete a folder in the current directory)");
                         break;
                     case "say":
-                        switch (tokens[1])
+                        if (tokens.Length >= 2)
                         {
-                            case "good":
-                                Good(string.Join(" ", tokens.Skip(2)));
-                                break;
-                            case "bad":
-                                Error(string.Join(" ", tokens.Skip(2)));
-                                break;
-                            case "warring":
-                                Warring(string.Join(" ", tokens.Skip(2)));
-                                break;
-                            case "help":
-                                Help("|text|         (Simply outputs your text to the console)");
-                                Help("good |text|    (Success message)");
-                                Help("bad |text|     (Error message)");
-                                Help("warring |text| (Warning)");
-                                break;
-                            default:
-                                Console.WriteLine(string.Join(" ", tokens.Skip(1)));
-                                break;
+                            switch (tokens[1])
+                            {
+                                case "good":
+                                    Good(string.Join(" ", tokens.Skip(2)));
+                                    break;
+                                case "bad":
+                                    Error(string.Join(" ", tokens.Skip(2)));
+                                    break;
+                                case "warring":
+                                    Warring(string.Join(" ", tokens.Skip(2)));
+                                    break;
+                                case "help":
+                                    Help("|text|         (Simply outputs your text to the console)");
+                                    Help("good |text|    (Success message)");
+                                    Help("bad |text|     (Error message)");
+                                    Help("warring |text| (Warning)");
+                                    break;
+                                default:
+                                    Console.WriteLine(string.Join(" ", tokens.Skip(1)));
+                                    break;
+                            }
                         }
                         break;
                     case "dir":
-                        switch (tokens[1])
+                        if (tokens.Length >= 2)
                         {
-                            case "create":
-                                Directory.CreateDirectory(tokens[2]);
-                                Good(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
-                                break;
-                            case "delete":
-                                try
-                                {
-                                    Directory.Delete(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
-                                    Good("Complete!");
-                                }
-                                catch (Exception e)
-                                {
-                                    Error(e.Message);
-                                }
-                                break;
-                            case "help":
-                                Help("create |folder name| (Create a folder in the current directory)");
-                                Help("delete |folder name| (Delete a folder in the current directory.)");
-                                break;
-                            default:
-                                Tip("dir help");
-                                break;
+                            switch (tokens[1])
+                            {
+                                case "create":
+                                    Directory.CreateDirectory(tokens[2]);
+                                    Good(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
+                                    break;
+                                case "delete":
+                                    try
+                                    {
+                                        Directory.Delete(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
+                                        Good("Complete!");
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Error(e.Message);
+                                    }
+
+                                    break;
+                                case "help":
+                                    Help("create |folder name| (Create a folder in the current directory)");
+                                    Help("delete |folder name| (Delete a folder in the current directory.)");
+                                    break;
+                                default:
+                                    Tip("dir help");
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Tip("dir help");
                         }
                         break;
                     case "ls":
-                        switch (tokens[1])
+                        if (tokens.Length >= 2)
                         {
-                            case  "":
-                                string[] directories = Directory.GetDirectories(Directory.GetCurrentDirectory());
-                                string[] files = Directory.GetFiles(Directory.GetCurrentDirectory());
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                for (int i = 0; i < directories.Length; i++)
-                                {
-                                    Console.WriteLine($"  ^ {directories[i]}");
-                                }
-                                Console.ForegroundColor = ConsoleColor.Blue;
-                                for (int i = 0; i < files.Length; i++)
-                                {
-                                    Console.WriteLine($"  > {files[i]}");
-                                }
-                                break;
-                            default:
-                                try
-                                {
-                                    string[] directoriesUser = Directory.GetDirectories(tokens[1]);
-                                    string[] filesUser = Directory.GetFiles(tokens[1]);
+                            switch (tokens[1])
+                            {
+                                case "":
+                                    string[] directories = Directory.GetDirectories(Directory.GetCurrentDirectory());
+                                    string[] files = Directory.GetFiles(Directory.GetCurrentDirectory());
                                     Console.ForegroundColor = ConsoleColor.Yellow;
-                                    for (int i = 0; i < directoriesUser.Length; i++)
+                                    for (int i = 0; i < directories.Length; i++)
                                     {
-                                        Console.WriteLine($"  ^ {directoriesUser[i]}");
+                                        Console.WriteLine($"  ^ {directories[i]}");
                                     }
+
                                     Console.ForegroundColor = ConsoleColor.Blue;
-                                    for (int i = 0; i < filesUser.Length; i++)
+                                    for (int i = 0; i < files.Length; i++)
                                     {
-                                        Console.WriteLine($"  > {filesUser[i]}");
+                                        Console.WriteLine($"  > {files[i]}");
                                     }
-                                }
-                                catch (Exception e)
-                                {
-                                    Error(e.Message);
-                                }
-                        
-                                break;
+
+                                    break;
+                                default:
+                                    try
+                                    {
+                                        string[] directoriesUser = Directory.GetDirectories(tokens[1]);
+                                        string[] filesUser = Directory.GetFiles(tokens[1]);
+                                        Console.ForegroundColor = ConsoleColor.Yellow;
+                                        for (int i = 0; i < directoriesUser.Length; i++)
+                                        {
+                                            Console.WriteLine($"  ^ {directoriesUser[i]}");
+                                        }
+
+                                        Console.ForegroundColor = ConsoleColor.Blue;
+                                        for (int i = 0; i < filesUser.Length; i++)
+                                        {
+                                            Console.WriteLine($"  > {filesUser[i]}");
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Error(e.Message);
+                                    }
+                                    break;
+                            }
                         }
                 
                         break;
                     case "cd":
-                        try
+                        if (tokens.Length >= 2)
                         {
-                            Directory.SetCurrentDirectory(tokens[1]);
-                            Good("Current directory : " + Directory.GetCurrentDirectory());
+                            try
+                            {
+                                Directory.SetCurrentDirectory(tokens[1]);
+                                Good("Current directory : " + Directory.GetCurrentDirectory());
+                            }
+                            catch (Exception e)
+                            {
+                                Error(e.Message);
+                            }
                         }
-                        catch (Exception e)
+                        else
                         {
-                            Error(e.Message);
+                            Tip("cd help");
                         }
                         break;
                     case "date":
@@ -203,6 +227,10 @@ internal abstract class Program
                                     break;
                             }
                         }
+                        else
+                        {
+                            Tip("file help");
+                        }
                         break;
                     case "clear":
                         Console.Clear();
@@ -226,11 +254,11 @@ internal abstract class Program
                         {
                             switch (tokens[1])
                             {
-                                case "os":
+                                case "pc":
                                     Console.WriteLine($"Os : {Environment.OSVersion}");
-                                    break;
-                                case "pc_name":
                                     Console.WriteLine($"Pc name : {Environment.MachineName}");
+                                    Console.WriteLine($"User : {Environment.UserName}");
+                                    Console.WriteLine($"Bit : {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
                                     break;
                                 case "info":
                                     DriveInfo driveInfo = new DriveInfo(Environment.CurrentDirectory);
@@ -238,19 +266,18 @@ internal abstract class Program
                                     Console.WriteLine($"PC         | {Environment.MachineName}");
                                     Console.WriteLine($"USER       | {Environment.UserName}");
                                     Console.WriteLine($"CPU_COUNT  | {Environment.ProcessorCount}");
+                                    Console.WriteLine($"RAM        | {(Process.GetCurrentProcess().WorkingSet64 / 1024.0 / 1024.0):F1} GB");
                                     Console.WriteLine($"BIT        | {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
                                     
                                     double gb = 1024.0 * 1024 * 1024;
-                                    Console.WriteLine($"Disk Space | {(driveInfo.TotalSize - driveInfo.TotalFreeSpace) / gb:F2}GB / {driveInfo.TotalSize / gb:F2}GB , Free Space {driveInfo.TotalFreeSpace / gb:F2}GB");
+                                    Console.WriteLine($"Disk Space | {(driveInfo.TotalSize - driveInfo.TotalFreeSpace) / gb:F1} GB  /  {driveInfo.TotalSize / gb:F1} GB , Free Space {driveInfo.TotalFreeSpace / gb:F1} GB");
                                     
                                     string kernelVersion = Environment.OSVersion.Version.ToString();
                                     Console.WriteLine($"Kernel     | {kernelVersion}");
                                     break;
                                 case "help":
                                     Console.ForegroundColor = ConsoleColor.Gray;
-                                    Help("os");
-                                    Help("pc_name");
-                                    Help("disk_space");
+                                    Help("pc");
                                     Help("info");
                                     break;
                                 default:
@@ -286,7 +313,7 @@ internal abstract class Program
                         }
                         else
                         {
-                            Help("wifi help");
+                            Tip("wifi help");
                         }
                         break;
                     case "bondarchuk":
@@ -357,33 +384,61 @@ internal abstract class Program
             }
             // ReSharper disable once FunctionNeverReturns
         }
-        void Start()
+        async Task Start()
         {
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("  ██████╗ ██╗ ██╗  ██████╗ ███████╗\n ██╔════╝████████╗██╔═══██╗██╔════╝\n ██║     ╚██╔═██╔╝██║   ██║███████╗\n ██║     ████████╗██║   ██║╚════██║\n ╚██████╗╚██╔═██╔╝╚██████╔╝███████║\n  ╚═════╝ ╚═╝ ╚═╝  ╚═════╝ ╚══════╝");
-            Console.ForegroundColor = ConsoleColor.DarkMagenta;
-            Console.WriteLine(" ┌─────────────┬─────────────────────────────────────────┐");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($" │  Version    │ {Version}[Beta]");
-            for (int i = 0; i < 40 - Version.Length - 6; i++)
+            for (int i = 0; i < consoleHeight / 2 - 3; i++)
+            {
+                Console.WriteLine();
+            }
+            for (int i = 0; i < consoleWidth / 2 - 16; i++)
             {
                 Console.Write(" ");
             }
-            Console.Write("│");
+            Console.Write("  ██████╗ ██╗ ██╗  ██████╗ ███████╗");
             Console.WriteLine();
-            Console.Write($" │  User Name  │ {Environment.UserName}");
-            for (int i = 0; i < 40 - Environment.UserName.Length; i++)
+            for (int i = 0; i < consoleWidth / 2 - 16; i++)
             {
                 Console.Write(" ");
             }
-            Console.Write("│");
-            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.Write(" ██╔════╝████████╗██╔═══██╗██╔════╝");
             Console.WriteLine();
-            Console.WriteLine(" ├─────────────┴─────────────────────────────────────────┤");
+            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            {
+                Console.Write(" ");
+            }
+            Console.Write(" ██║     ╚██╔═██╔╝██║   ██║███████╗");
+            Console.WriteLine();
+            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            {
+                Console.Write(" ");
+            }
+            Console.Write(" ██║     ████████╗██║   ██║╚════██║");
+            Console.WriteLine();
+            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            {
+                Console.Write(" ");
+            }
+            Console.Write(" ╚██████╗╚██╔═██╔╝╚██████╔╝███████║");
+            Console.WriteLine();
+            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            {
+                Console.Write(" ");
+            }
+            Console.Write("  ╚═════╝ ╚═╝ ╚═╝  ╚═════╝ ╚══════╝");
+            Console.WriteLine();
+            for (int i = 0; i < consoleWidth / 2 - 4; i++)
+            {
+                Console.Write(" ");
+            }
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(" │                       ! Welcome !                     │");
-            Console.ForegroundColor = ConsoleColor.DarkMagenta;
-            Console.WriteLine(" └───────────────────────────────────────────────────────┘");
+            Console.WriteLine("! Welcome !");
+            await Task.Delay(2000);
+            Console.Clear();
+            Console.WriteLine();
+            Console.ResetColor();
+            Console.WriteLine($" │  Version    │ {Version}[Beta]");
+            Console.WriteLine($" │  User Name  │ {Environment.UserName}");
             Good("Remember, the 'help' command is always there to help!");
             Good("Just a reminder that we're on GitHub: https://github.com/Skviki/CsOS");
         }
