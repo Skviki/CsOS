@@ -6,7 +6,7 @@ internal abstract class Program
 {
     public static int ConsoleWidth = Console.BufferWidth;
     public static int ConsoleHeight = Console.BufferHeight;
-    const string Version = "1.4.6";
+    const string Version = "1.4.7";
     private static string[]? _commandOld = ["say","warning","No commands yet!"];
 
     public static async Task Main()
@@ -40,7 +40,9 @@ internal abstract class Program
                     
                     if (input.Key == ConsoleKey.UpArrow)
                     {
-                        return "^";
+                        text += string.Join(" ",_commandOld!);
+                        Console.Write(string.Join(" ",_commandOld!));
+                        continue;
                     }
 
                     if (input.Key == ConsoleKey.LeftArrow)
@@ -70,6 +72,7 @@ internal abstract class Program
                         }
                         continue;
                     }
+                    
                     text += input.KeyChar;
                     Console.Write(input.KeyChar);
                 }
@@ -90,7 +93,7 @@ internal abstract class Program
                         Help("exit                                  (The command you can use to exit our C#OS shell.)");
                         Console.ForegroundColor = ConsoleColor.DarkCyan;
                         Console.WriteLine("Easy");
-                        Help("say none/good/bad/Warning |text|      (Output text to the console)");
+                        Help("say none/good/bad/warning |text|      (Output text to the console)");
                         Help("cd |path|                             (Change directory)");
                         Help("wait |time|                           (Wait for a certain amount of time, where 1000 = 1 second)");
                         Help("ls this/|path|                        (Shows what is inside the current folder or the folder chosen by you)");
@@ -99,7 +102,7 @@ internal abstract class Program
                         Help("system pc/info                        (Display information about the device)");
                         Console.ForegroundColor = ConsoleColor.Blue;
                         Console.WriteLine("Normal");
-                        Help("file write/read |path to file|        (Write or read a file)");
+                        Help("file write/read/delete |content_text|        (Write or read a file)");
                         Help("dir create/delet |folder name|        (Create or delete a folder in the current directory)");
                         break;
                     case "say":
@@ -140,14 +143,30 @@ internal abstract class Program
                                 case "delete":
                                     try
                                     {
-                                        Directory.Delete(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
-                                        Good("Complete!");
+                                        if (Directory.GetFiles(tokens[2]).Length == 0)
+                                        {
+                                            Directory.Delete(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]));
+                                            Good("Complete!");
+                                        }
+                                        else
+                                        {
+                                            Warning("This directory contains files inside. Do you confirm the deletion? This will also irreversibly delete the files inside this folder!");
+                                            switch(QuestionYesOrNo())
+                                            {
+                                                case "yes":
+                                                    Directory.Delete(Path.Combine(Directory.GetCurrentDirectory(), tokens[2]), true);
+                                                    Good("Complete!");
+                                                    break;
+                                                case "no":
+                                                    Warning("Canceled");
+                                                    break;
+                                            }
+                                        }
                                     }
                                     catch (Exception e)
                                     {
                                         Error(e.Message);
                                     }
-
                                     break;
                                 case "help":
                                     Help("create |folder name| (Create a folder in the current directory)");
@@ -240,7 +259,7 @@ internal abstract class Program
                                     try
                                     {
                                         File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "file.txt"), string.Join(" ", tokens.Skip(2)));
-                                        Good("file written" + Path.Combine(Directory.GetCurrentDirectory(), "file.txt"));
+                                        Good("file written : " + Path.Combine(Directory.GetCurrentDirectory(), "file.txt"));
                                     }
                                     catch (Exception e)
                                     {
@@ -261,6 +280,7 @@ internal abstract class Program
                                     try
                                     {
                                         File.Delete(tokens[2]);
+                                        Good("File deleted");
                                     }
                                     catch (Exception e)
                                     {
@@ -268,7 +288,7 @@ internal abstract class Program
                                     }
                                     break;
                                 case "help":
-                                    Help("write |path to file| or 'this' |content_text|");
+                                    Help("write |content_text|");
                                     Help("read |path to file|");
                                     break;
                                 default:
@@ -310,19 +330,13 @@ internal abstract class Program
                                     Console.WriteLine($"Bit : {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
                                     break;
                                 case "info":
-                                    DriveInfo driveInfo = new DriveInfo(Environment.CurrentDirectory);
                                     Console.WriteLine($"OS         | {Environment.OSVersion}");
                                     Console.WriteLine($"PC         | {Environment.MachineName}");
                                     Console.WriteLine($"USER       | {Environment.UserName}");
                                     Console.WriteLine($"CPU_COUNT  | {Environment.ProcessorCount}");
                                     Console.WriteLine($"RAM        | {(Process.GetCurrentProcess().WorkingSet64 / 1024.0 / 1024.0):F1} GB");
                                     Console.WriteLine($"BIT        | {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
-                                    
-                                    double gb = 1024.0 * 1024 * 1024;
-                                    Console.WriteLine($"Disk Space | {(driveInfo.TotalSize - driveInfo.TotalFreeSpace) / gb:F1} GB  /  {driveInfo.TotalSize / gb:F1} GB , Free Space {driveInfo.TotalFreeSpace / gb:F1} GB");
-                                    
-                                    string kernelVersion = Environment.OSVersion.Version.ToString();
-                                    Console.WriteLine($"Kernel     | {kernelVersion}");
+                                    Console.WriteLine($"Kernel     | {Environment.OSVersion.Version.ToString()}");
                                     break;
                                 case "help":
                                     Console.ForegroundColor = ConsoleColor.Gray;
@@ -475,11 +489,10 @@ internal abstract class Program
                 Console.Write(" ");
             }
             Console.ForegroundColor = ConsoleColor.Yellow;
+            await Task.Delay(1500);
             Console.WriteLine("! Welcome !");
-            await Task.Delay(3000);
+            await Task.Delay(1500);
             Console.Clear();
-            Console.WriteLine();
-            Console.ResetColor();
             Good("Remember, the 'help' command is always there to help!");
             Good("Just a reminder that we're on GitHub: https://github.com/Skviki/CsOS");
             Console.CursorVisible = true;
@@ -574,6 +587,28 @@ internal abstract class Program
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" - it will show you which arguments are supported.");
             Console.WriteLine();
+        }
+
+        string QuestionYesOrNo()
+        {
+            Console.Write("[ yes / no ] : ");
+            string answer = "none";
+            try
+            {
+                answer = Console.ReadLine()!.ToLower();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            if (answer != "yes" && answer != "no")
+            {
+                return "no";
+            }
+            else
+            {
+                return answer;
+            }
         }
     }
 }
