@@ -4,30 +4,79 @@ namespace CsOS;
 
 internal abstract class Program
 {
-    public static int consoleWidth = Console.BufferWidth;
-    public static int consoleHeight = Console.BufferHeight;
-    private static readonly HttpClient Client = new();
-    const string Version = "1.4.5";
-    private static string[]? _commandOld = ["say","hello!"];
+    public static int ConsoleWidth = Console.BufferWidth;
+    public static int ConsoleHeight = Console.BufferHeight;
+    const string Version = "1.4.6";
+    private static string[]? _commandOld = ["say","warning","No commands yet!"];
 
     public static async Task Main()
     {
         await Start();
-        ComandRequied();
-        void ComandRequied()
+        await ComandRequied();
+        async Task ComandRequied()
         {
             while (true)
             {
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.Write(Directory.GetCurrentDirectory());
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
                 Console.Write(" > ");
                 Console.ResetColor();
-                string? text = Console.ReadLine();
-                string[] tokens = text!.Trim().Split();
-                TokenAnalize(tokens);
+                string[] tokens = InputKey()!.Trim().Split();
+                await TokenAnalyze(tokens);
             }
-            void TokenAnalize(string[] tokens)
+            string InputKey()
+            {
+                int startX = Console.CursorLeft;
+                string text = "";
+                while (true)
+                {
+                    ConsoleKeyInfo input = Console.ReadKey(true);
+                    if (input.Key == ConsoleKey.Enter)
+                    {
+                        Console.WriteLine();
+                        break;
+                    }
+                    
+                    if (input.Key == ConsoleKey.UpArrow)
+                    {
+                        return "^";
+                    }
+
+                    if (input.Key == ConsoleKey.LeftArrow)
+                    {
+                        if (Console.CursorLeft > startX)
+                        {
+                            Console.CursorLeft--;
+                        }
+                        continue;
+                    }
+                    
+                    if (input.Key == ConsoleKey.RightArrow)
+                    {
+                        if (Console.CursorLeft < startX + text.Length)
+                        {
+                            Console.CursorLeft++;
+                        }
+                        continue;
+                    }
+                    
+                    if (input.Key == ConsoleKey.Backspace)
+                    {
+                        if (text.Length > 0)
+                        {
+                            text = text.Remove(text.Length - 1);
+                            Console.Write("\b \b");
+                        }
+                        continue;
+                    }
+                    text += input.KeyChar;
+                    Console.Write(input.KeyChar);
+                }
+                return text;
+            }
+            
+            async Task TokenAnalyze(string[] tokens)
             {
                 switch (tokens[0])
                 {
@@ -41,12 +90,13 @@ internal abstract class Program
                         Help("exit                                  (The command you can use to exit our C#OS shell.)");
                         Console.ForegroundColor = ConsoleColor.DarkCyan;
                         Console.WriteLine("Easy");
-                        Help("say none/good/bad/warring |text|      (Output text to the console)");
-                        Help("cd |path|                             (Change director)");
-                        Help("ls none/|path|                        (Shows what is inside the current folder or the folder chosen by you)");
+                        Help("say none/good/bad/Warning |text|      (Output text to the console)");
+                        Help("cd |path|                             (Change directory)");
+                        Help("wait |time|                           (Wait for a certain amount of time, where 1000 = 1 second)");
+                        Help("ls this/|path|                        (Shows what is inside the current folder or the folder chosen by you)");
                         Help("run_cfile |path|                      (Reads a text file and executes each line as a system command. Empty lines and comments (with #) are ignored.)");
-                        Help("run |path| or |ArchLinux command|     (Executes the file located at the specified path)");
-                        Help("system os/pc_name/info    (Display information about the device)");
+                        Help("run |ArchLinux command|               (Executes the specified Arch Linux command)");
+                        Help("system pc/info                        (Display information about the device)");
                         Console.ForegroundColor = ConsoleColor.Blue;
                         Console.WriteLine("Normal");
                         Help("file write/read |path to file|        (Write or read a file)");
@@ -63,14 +113,14 @@ internal abstract class Program
                                 case "bad":
                                     Error(string.Join(" ", tokens.Skip(2)));
                                     break;
-                                case "warring":
-                                    Warring(string.Join(" ", tokens.Skip(2)));
+                                case "warning":
+                                    Warning(string.Join(" ", tokens.Skip(2)));
                                     break;
                                 case "help":
                                     Help("|text|         (Simply outputs your text to the console)");
                                     Help("good |text|    (Success message)");
                                     Help("bad |text|     (Error message)");
-                                    Help("warring |text| (Warning)");
+                                    Help("Warning |text| (Warning)");
                                     break;
                                 default:
                                     Console.WriteLine(string.Join(" ", tokens.Skip(1)));
@@ -118,7 +168,7 @@ internal abstract class Program
                         {
                             switch (tokens[1])
                             {
-                                case "":
+                                case "this":
                                     string[] directories = Directory.GetDirectories(Directory.GetCurrentDirectory());
                                     string[] files = Directory.GetFiles(Directory.GetCurrentDirectory());
                                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -179,8 +229,7 @@ internal abstract class Program
                         }
                         break;
                     case "date":
-                        Console.WriteLine(DateTime.Now);
-                        Warring($"Currently, the OS version shows incorrect time because the default time zone is set to: {TimeZoneInfo.Local.Id} . This will be fixed in future updates.");
+                        Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd"));
                         break;
                     case "file":
                         if (tokens.Length >= 3)
@@ -188,23 +237,14 @@ internal abstract class Program
                             switch (tokens[1])
                             {
                                 case "write":
-                                    if (tokens[2] == "this")
+                                    try
                                     {
-                                        File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "file.txt"),
-                                            string.Join(" ", tokens.Skip(3)));
-                                        Good("file written" +
-                                             Path.Combine(Directory.GetCurrentDirectory(), "file.txt"));
+                                        File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "file.txt"), string.Join(" ", tokens.Skip(2)));
+                                        Good("file written" + Path.Combine(Directory.GetCurrentDirectory(), "file.txt"));
                                     }
-                                    else
+                                    catch (Exception e)
                                     {
-                                        try
-                                        {
-                                            File.WriteAllText(tokens[2], tokens[3]);
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            Error("Fail to write : " + e.Message);
-                                        }
+                                        Error(e.Message);
                                     }
                                     break;
                                 case "read":
@@ -216,7 +256,16 @@ internal abstract class Program
                                     {
                                         Error(e.Message);
                                     }
-
+                                    break;
+                                case "delete":
+                                    try
+                                    {
+                                        File.Delete(tokens[2]);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Error(e.Message);
+                                    }
                                     break;
                                 case "help":
                                     Help("write |path to file| or 'this' |content_text|");
@@ -290,32 +339,6 @@ internal abstract class Program
                             Tip("system help");
                         }
                         break;
-                    case "wifi":
-                        if (tokens.Length >= 2)
-                        {
-                            switch (tokens[1])
-                            {
-                                case "list":
-                                    Process.Start("nmcli device wifi list");
-                                    break;
-                                case "connect":
-                                    Process.Start($"nmcli device wifi connect '{tokens[1]}' password '{tokens[2]}'");
-                                    break;
-                            }
-                            try
-                            {
-                                Process.Start($"nmcli device wifi list nmcli device wifi connect '{tokens[1]}' password '{tokens[2]}'");
-                            }
-                            catch (Exception e)
-                            {
-                                Error(e.Message);
-                            }
-                        }
-                        else
-                        {
-                            Tip("wifi help");
-                        }
-                        break;
                     case "bondarchuk":
                         Bondarchuk();
                         break;
@@ -344,7 +367,7 @@ internal abstract class Program
                                 for (int i = 0; i < tokenAnalize.Length; i++)
                                 {
                                     string[] tokenToAnalize = tokenAnalize[i].Split(' ');
-                                    TokenAnalize(tokenToAnalize);
+                                    await TokenAnalyze(tokenToAnalize);
                                 }
                             }
                             catch (Exception e)
@@ -356,14 +379,24 @@ internal abstract class Program
                     case "exit":
                         Process.GetCurrentProcess().Kill();
                         break;
-                    case "check_update":
-                       CheckVersion(Version);
-                       break;
                     case "^":
                         if (_commandOld![0] != "^")
                         {
                             if (_commandOld != null) 
-                                TokenAnalize(_commandOld);
+                                await TokenAnalyze(_commandOld);
+                        }
+                        break;
+                    case "wait":
+                        if (tokens.Length == 2)
+                        {
+                            try
+                            {
+                                await Task.Delay(Convert.ToInt32(tokens[1]));
+                            }
+                            catch (Exception e)
+                            {
+                                Error(e.Message);
+                            }
                         }
                         break;
                     case "#":
@@ -384,63 +417,72 @@ internal abstract class Program
             }
             // ReSharper disable once FunctionNeverReturns
         }
+
+        
         async Task Start()
         {
+            Console.CursorVisible = false;
             Console.ForegroundColor = ConsoleColor.Magenta;
-            for (int i = 0; i < consoleHeight / 2 - 3; i++)
+            for (int i = 0; i < ConsoleHeight / 2 - 5; i++)
             {
                 Console.WriteLine();
             }
-            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            for (int i = 0; i < ConsoleWidth / 2 - 16; i++)
             {
                 Console.Write(" ");
             }
             Console.Write("  ██████╗ ██╗ ██╗  ██████╗ ███████╗");
             Console.WriteLine();
-            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            for (int i = 0; i < ConsoleWidth / 2 - 16; i++)
             {
                 Console.Write(" ");
             }
             Console.Write(" ██╔════╝████████╗██╔═══██╗██╔════╝");
             Console.WriteLine();
-            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            for (int i = 0; i < ConsoleWidth / 2 - 16; i++)
             {
                 Console.Write(" ");
             }
             Console.Write(" ██║     ╚██╔═██╔╝██║   ██║███████╗");
             Console.WriteLine();
-            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            for (int i = 0; i < ConsoleWidth / 2 - 16; i++)
             {
                 Console.Write(" ");
             }
             Console.Write(" ██║     ████████╗██║   ██║╚════██║");
             Console.WriteLine();
-            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            for (int i = 0; i < ConsoleWidth / 2 - 16; i++)
             {
                 Console.Write(" ");
             }
             Console.Write(" ╚██████╗╚██╔═██╔╝╚██████╔╝███████║");
             Console.WriteLine();
-            for (int i = 0; i < consoleWidth / 2 - 16; i++)
+            for (int i = 0; i < ConsoleWidth / 2 - 16; i++)
             {
                 Console.Write(" ");
             }
             Console.Write("  ╚═════╝ ╚═╝ ╚═╝  ╚═════╝ ╚══════╝");
             Console.WriteLine();
-            for (int i = 0; i < consoleWidth / 2 - 4; i++)
+            for (int i = 0; i < (ConsoleWidth / 2 - Version.Length / 2) + 1; i++)
+            {
+                Console.Write(" ");
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(Version);
+            Console.WriteLine();
+            for (int i = 0; i < ConsoleWidth / 2 - 4; i++)
             {
                 Console.Write(" ");
             }
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("! Welcome !");
-            await Task.Delay(2000);
+            await Task.Delay(3000);
             Console.Clear();
             Console.WriteLine();
             Console.ResetColor();
-            Console.WriteLine($" │  Version    │ {Version}[Beta]");
-            Console.WriteLine($" │  User Name  │ {Environment.UserName}");
             Good("Remember, the 'help' command is always there to help!");
             Good("Just a reminder that we're on GitHub: https://github.com/Skviki/CsOS");
+            Console.CursorVisible = true;
         }
 
         void Bondarchuk()
@@ -506,10 +548,10 @@ internal abstract class Program
             Console.WriteLine(" [x] " + textError);
             Console.ResetColor();
         }
-        void Warring(string textWarring)
+        void Warning(string textWarning)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(" [!] " + textWarring);
+            Console.WriteLine(" [!] " + textWarning);
             Console.ResetColor();
         }
         void Good(string textGood)
@@ -532,28 +574,6 @@ internal abstract class Program
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" - it will show you which arguments are supported.");
             Console.WriteLine();
-        }
-
-        async void CheckVersion(string versionCur)
-        {
-            try
-            {
-                string versionGet = await Client.GetStringAsync("https://raw.githubusercontent.com/Skviki/CsOS/refs/heads/master/v.txt");
-                if (versionGet != versionCur)
-                {
-                    Good($"A new version {versionGet} is available! Current version {versionCur}.");
-                    Warring("The update feature has not been implemented yet!");
-                    Warring("Follow the link https://github.com/Skviki/CsOS to download a newer version!");
-                }
-                else
-                {
-                    Good("There are no updates");
-                }
-            }
-            catch (Exception e)
-            {
-                Error(e.Message);
-            }
         }
     }
 }
